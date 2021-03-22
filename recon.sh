@@ -51,6 +51,9 @@ cat $reconDir"sublister.txt" >> $allDomains
 cat $allDomains | sed 's/<BR>/\n/g' > $reconDir"enum.txt"
 cat $reconDir"enum.txt" | sort -u > $allDomains
 
+# Remove those domains that may not belong in scope. Comment out if taking acquisitions into consideration.
+cat $allDomains | grep $domain > $allDomains
+
 echo "[+] All the domains.."
 cat $allDomains
 
@@ -59,7 +62,8 @@ cat $allDomains | httprobe > $activeDomainsWithHttp
 
 echo "[+] Making a note of the domains running HTTP servers."
 cat $activeDomainsWithHttp | while read line; do echo "$line" | cut -d "/" -f 3; done > $activeDomainsFile
-cat $activeDomainsFile | sort -u > $activeDomainsFile
+cat $activeDomainsFile | sort -u > $reconDir"active.txt"
 
 echo "[+] Gathering list of domains, that do not have HTTP servers running. This can be used for running nmap scans."
 comm --check-order -23 $allDomains $activeDomainsFile > $domainsWithoutHttp
+
