@@ -35,6 +35,7 @@ domain="$1"
 allDomains=$reconDir"allDomains.txt"
 activeDomainsFile=$reconDir"active.txt"
 activeDomainsWithHttp=$reconDir"activeHttp.txt"
+domainsWithoutHttp=$reconDir"noHttp.txt"
 
 echo "[+] Gathering subdomains from crt.sh"
 ./crt.sh $domain
@@ -52,3 +53,13 @@ cat $reconDir"enum.txt" | sort -u > $allDomains
 
 echo "[+] All the domains.."
 cat $allDomains
+
+echo "[+] Gathering list of domains with HTTP servers"
+cat $allDomains | httprobe > $activeDomainsWithHttp
+
+echo "[+] Making a note of the domains running HTTP servers."
+cat $activeDomainsWithHttp | while read line; do echo "$line" | cut -d "/" -f 3; done > $activeDomainsFile
+cat $activeDomainsFile | sort -u > $activeDomainsFile
+
+echo "[+] Gathering list of domains, that do not have HTTP servers running. This can be used for running nmap scans."
+comm --check-order -23 $allDomains $activeDomainsFile > $domainsWithoutHttp
